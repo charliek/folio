@@ -114,7 +114,7 @@ See `examples/` for starter configs.
 Prerequisites: [mise](https://mise.jdx.dev/) for Go and linter versions, [uv](https://docs.astral.sh/uv/) for docs.
 
 ```bash
-mise install           # Install Go 1.24 + golangci-lint
+mise install           # Install Go 1.25 + golangci-lint
 make build             # Build server binary
 make test              # Run unit tests
 make lint              # Run linter

@@ -11,7 +11,7 @@
 mise install
 ```
 
-This installs Go 1.24 and golangci-lint 2.10.1.
+This installs Go 1.25 and golangci-lint 2.10.1.
 
 ## Build
 
