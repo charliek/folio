@@ -1,0 +1,12 @@
+[project]
+name = "my-project-docs"
+version = "0.1.0"
+description = "Documentation for my-project"
+requires-python = ">=3.12"
+
+[dependency-groups]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.14",
+    "pymdownx-extensions>=10.15",
+]

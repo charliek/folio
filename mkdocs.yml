@@ -1,0 +1,96 @@
+# =============================================================================
+# Documentation Style Guidelines
+# =============================================================================
+# - Professional, direct tone (no marketing language)
+# - Tables for all CLI options and configuration fields
+# - Code blocks with language hints (yaml, bash, json, go)
+# - Use admonitions sparingly (only for important notes/warnings)
+# - Examples should be copy-pasteable
+# - Keep pages focused and concise - one topic per page
+# - No deep troubleshooting guides - keep it minimal but useful
+# =============================================================================
+
+site_name: folio
+site_description: 'Self-hosted private documentation platform'
+site_author: 'folio Contributors'
+site_url: 'https://charliek.github.io/folio/'
+
+repo_name: charliek/folio
+repo_url: https://github.com/charliek/folio
+edit_uri: edit/main/docs/
+
+docs_dir: docs
+site_dir: site-build
+
+dev_addr: '127.0.0.1:7070'
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - navigation.footer
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  icon:
+    logo: material/book-lock
+
+plugins:
+  - search
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - admonition
+  - attr_list
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Quick Start: getting-started/quick-start.md
+      - How It Works: getting-started/how-it-works.md
+  - Guides:
+      - Caller Setup: guides/caller-setup.md
+      - GCP Setup: guides/gcp-setup.md
+  - Reference:
+      - Configuration: reference/configuration.md
+      - API: reference/api.md
+      - Path Rewriting: reference/path-rewriting.md
+  - Development:
+      - Setup: development/setup.md
+      - Architecture: development/architecture.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/charliek/folio
