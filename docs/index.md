@@ -15,7 +15,7 @@ Folio lets you build documentation from any private repo with GitHub Actions, pu
 
 ## How It Works
 
-```
+```text
 Private repos                        folio
 ┌──────────┐  ┌──────────┐    ┌──────────────────────┐
 │ repo-a    │  │ repo-b    │    │ GCS Bucket            │

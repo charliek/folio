@@ -26,7 +26,7 @@ func newAuthMiddleware(hmacKey []byte, authMode string) func(http.Handler) http.
 
 			cookie, err := r.Cookie("_session")
 			if err != nil || !validateCookie(cookie.Value, hmacKey) {
-				loginURL := "/_login?next=" + url.QueryEscape(r.URL.Path)
+				loginURL := "/_login?next=" + url.QueryEscape(r.URL.RequestURI())
 				http.Redirect(w, r, loginURL, http.StatusFound)
 				return
 			}

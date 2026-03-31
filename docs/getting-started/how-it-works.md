@@ -55,7 +55,7 @@ Cache can be cleared via `POST /_admin/cache/purge`.
 
 ## Publish Workflow
 
-Each repo calls folio's reusable GitHub Actions workflow:
+Each repo will call folio's reusable GitHub Actions workflow (planned for Phase 3). The workflow will:
 
 1. Checkout the repo
 2. Install mkdocs via uv

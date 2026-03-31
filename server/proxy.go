@@ -219,9 +219,13 @@ func readGCSObject(ctx context.Context, bucket *storage.BucketHandle, key string
 	}
 	defer func() { _ = reader.Close() }()
 
-	data, err := io.ReadAll(io.LimitReader(reader, maxReadBytes))
+	// Read up to maxReadBytes+1 to detect oversized objects.
+	data, err := io.ReadAll(io.LimitReader(reader, maxReadBytes+1))
 	if err != nil {
 		return nil, "", err
+	}
+	if int64(len(data)) > maxReadBytes {
+		return nil, "", fmt.Errorf("object %q exceeds maximum size of %d bytes", key, maxReadBytes)
 	}
 
 	return data, reader.Attrs.ContentType, nil

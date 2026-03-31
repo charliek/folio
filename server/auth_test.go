@@ -110,6 +110,23 @@ func TestAuthMiddleware_NoCookie(t *testing.T) {
 	assert.Equal(t, "/_login?next=%2Fprotected%2Fpage", location)
 }
 
+func TestAuthMiddleware_PreservesQueryParams(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	mw := newAuthMiddleware([]byte("secret"), "password")
+	wrapped := mw(handler)
+
+	req := httptest.NewRequest("GET", "/page?foo=bar&baz=1", nil)
+	rec := httptest.NewRecorder()
+	wrapped.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusFound, rec.Code)
+	location := rec.Header().Get("Location")
+	assert.Equal(t, "/_login?next=%2Fpage%3Ffoo%3Dbar%26baz%3D1", location)
+}
+
 func TestAuthMiddleware_ValidCookie(t *testing.T) {
 	hmacKey := []byte("secret")
 	handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {

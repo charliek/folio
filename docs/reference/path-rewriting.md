@@ -25,7 +25,7 @@ Before rewriting, paths are cleaned with Go's `path.Clean`:
 
 - Double slashes (`//`) are collapsed
 - Dot segments (`.`, `..`) are resolved
-- Trailing dots are removed
+- Relative path components are normalized
 
 This prevents path traversal attacks. After rewriting, the server validates that the resulting GCS key starts with either the root prefix or the repos prefix.
 

@@ -4,7 +4,7 @@
 
 All Go code lives in `server/`:
 
-```
+```text
 server/
 ├── main.go       # Entry point, config, routing, lazy GCS client
 ├── auth.go       # Login page, cookie validation, auth middleware

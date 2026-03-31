@@ -1,5 +1,8 @@
 # Caller Setup
 
+!!! note
+    The reusable workflow (`publish-docs.yml`) is planned for Phase 3. This page documents the intended setup for when that workflow is available.
+
 Add documentation publishing to any repo by creating a GitHub Actions workflow that calls folio's reusable workflow.
 
 ## Prerequisites
@@ -69,7 +72,9 @@ Key conventions:
 - `site_url` should point to the folio domain path
 - `dev_addr` on port 7070
 
-## Workflow Inputs
+## Workflow Inputs (Planned)
+
+These inputs will be available when the reusable workflow is created in Phase 3:
 
 | Input | Description | Default |
 |-------|-------------|---------|

@@ -259,7 +259,7 @@ func (lb *LazyBucket) init(ctx context.Context) error {
 	}
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("creating GCS client: %w", err)
+		return fmt.Errorf("%w: %v", ErrNotInitialized, err)
 	}
 	lb.client = client
 	lb.bucket = client.Bucket(lb.bucketName)
