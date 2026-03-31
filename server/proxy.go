@@ -26,6 +26,9 @@ type BucketReader interface {
 // ErrNotInitialized is returned when the GCS client has not been initialized.
 var ErrNotInitialized = errors.New("GCS client not initialized")
 
+// ErrObjectTooLarge is returned when a GCS object exceeds the read size limit.
+var ErrObjectTooLarge = errors.New("GCS object exceeds read limit")
+
 // rewritePath maps a URL path to a GCS object key.
 // Paths are cleaned to prevent traversal, then routed:
 //   - /repos/* passes through to GCS directly
@@ -202,6 +205,11 @@ func handleGCSError(w http.ResponseWriter, err error, key string) {
 		http.Error(w, "Service Unavailable", http.StatusServiceUnavailable)
 		return
 	}
+	if errors.Is(err, ErrObjectTooLarge) {
+		slog.Warn("object too large", "key", key, "error", err)
+		http.Error(w, "Object Too Large", http.StatusRequestEntityTooLarge)
+		return
+	}
 	slog.Error("GCS error", "key", key, "error", err)
 	http.Error(w, "Bad Gateway", http.StatusBadGateway)
 }
@@ -225,7 +233,7 @@ func readGCSObject(ctx context.Context, bucket *storage.BucketHandle, key string
 		return nil, "", err
 	}
 	if int64(len(data)) > maxReadBytes {
-		return nil, "", fmt.Errorf("object %q exceeds maximum size of %d bytes", key, maxReadBytes)
+		return nil, "", fmt.Errorf("%w: object %q exceeds %d bytes", ErrObjectTooLarge, key, maxReadBytes)
 	}
 
 	return data, reader.Attrs.ContentType, nil

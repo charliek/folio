@@ -122,6 +122,7 @@ func newLoginSubmitHandler(password string, hmacKey []byte, maxAge time.Duration
 }
 
 // isValidRedirect checks that a redirect target is a safe relative path.
+// Validates only the path component — query strings and fragments are allowed.
 // Rejects absolute URLs, protocol-relative URLs, and paths with traversal segments.
 func isValidRedirect(target string) bool {
 	if target == "" {
@@ -133,8 +134,13 @@ func isValidRedirect(target string) bool {
 	if strings.HasPrefix(target, "//") {
 		return false
 	}
+	// Extract path component only (strip query and fragment).
+	pathPart := target
+	if i := strings.IndexAny(target, "?#"); i >= 0 {
+		pathPart = target[:i]
+	}
 	// Reject path traversal segments but allow ".." in filenames (e.g., "file..v2.html").
-	for _, seg := range strings.Split(target, "/") {
+	for _, seg := range strings.Split(pathPart, "/") {
 		if seg == ".." {
 			return false
 		}

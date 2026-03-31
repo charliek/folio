@@ -246,6 +246,9 @@ func TestIsValidRedirect(t *testing.T) {
 		{"relative no slash", "relative/path", false},
 		{"double dot in filename", "/docs/file..v2.html", true},
 		{"traversal segment", "/docs/../etc/passwd", false},
+		{"query with traversal in value", "/search?repo=/../docs", true},
+		{"path with query", "/page?foo=bar", true},
+		{"path with fragment", "/page#section", true},
 	}
 
 	for _, tt := range tests {

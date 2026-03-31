@@ -176,6 +176,10 @@ func validateConfig(cfg *Config) error {
 }
 
 func resolveSecrets(ctx context.Context, cfg *Config) error {
+	if cfg.AuthMode == authModeNone {
+		return nil
+	}
+
 	passwordSecret := os.Getenv("LOGIN_PASSWORD_SECRET")
 	hmacSecret := os.Getenv("COOKIE_HMAC_SECRET")
 
