@@ -1,0 +1,35 @@
+# Binary
+server/folio
+
+# Build artifacts
+bin/
+dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test artifacts
+coverage.out
+coverage.html
+*.test
+
+# OS files
+.DS_Store
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python/uv
+.venv/
+
+# MkDocs build output
+site-build/
+
+# Claude Code local/user-specific files
+.claude/settings.local.json
+.claude/projects/

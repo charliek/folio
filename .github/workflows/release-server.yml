@@ -1,0 +1,61 @@
+name: Release Server
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.25'
+
+      - name: Run Tests
+        run: cd server && go test ./...
+
+      - name: Run Linter
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.10.1
+          working-directory: server
+          args: -c ../.golangci.yml
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version
+        id: version
+        run: echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: server
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/charliek/folio:${{ steps.version.outputs.tag }}
+            ghcr.io/charliek/folio:latest
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
