@@ -22,25 +22,24 @@ Stand up the private instance on a custom domain.
 - [x] Deploy to Cloud Run, set up domain mapping and DNS
 - [x] Verify end-to-end: upload test HTML to GCS, visit the domain, see login → content
 
-## Phase 3: Root Site & Reusable Workflow
+## Phase 3: Root Site & Reusable Workflow ✅
 
 Wire up the documentation publishing pipeline.
 
-- Create `publish-root.yml` workflow (push to `docs/` → build mkdocs, sync to `gs://{bucket}/_root/`)
-- Create `publish-docs.yml` reusable workflow with `_meta.json` write step
-- Add `/_api/repos` endpoint integration with the root landing page
-- Build the root landing page to fetch `/_api/repos` and render a dynamic repo index
-- Verify: push a docs change → root site updates on the private domain
+- [x] Create `publish-docs.yml` reusable workflow with `_meta.json` write step
+- [x] Set up root site with `publish-root.yml` workflow (syncs to `_root/` in GCS)
+- [x] Build root landing page to fetch `/_api/repos` and render a dynamic repo index
+- [x] Verify: push a docs change → root site updates on the private domain
 
-## Phase 4: Onboard Repos
+## Phase 4: Onboard Repos ✅
 
 Start publishing real documentation from private repos.
 
-- Add caller workflow to first repo
-- Verify it appears under `/repos/{name}/` on the private domain
-- Confirm `_meta.json` is written and `/_api/repos` returns the entry
-- Onboard additional repos
-- Iterate on the root landing page design as the repo list grows
+- [x] Add caller workflow to first repo
+- [x] Verify it appears under `/repos/{name}/` on the private domain
+- [x] Confirm `_meta.json` is written and `/_api/repos` returns the entry
+- [ ] Onboard additional repos
+- [ ] Iterate on the root landing page design as the repo list grows
 
 ## Future Considerations
 

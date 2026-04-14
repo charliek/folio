@@ -84,7 +84,7 @@ gcloud run deploy $SERVICE_NAME \
 ```bash
 export DOMAIN=docs.example.com
 
-gcloud run domain-mappings create \
+gcloud beta run domain-mappings create \
   --service=$SERVICE_NAME \
   --domain=$DOMAIN \
   --region=$REGION \
@@ -130,6 +130,16 @@ gcloud storage buckets add-iam-policy-binding gs://$BUCKET_NAME \
   --member="serviceAccount:$CI_SA_NAME@$PROJECT_ID.iam.gserviceaccount.com" \
   --role="roles/storage.objectAdmin"
 
+# Grant Cloud Run deploy access (for the deploy workflow).
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:$CI_SA_NAME@$PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/run.developer"
+
+gcloud iam service-accounts add-iam-policy-binding \
+  $SA_NAME@$PROJECT_ID.iam.gserviceaccount.com \
+  --member="serviceAccount:$CI_SA_NAME@$PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountUser"
+
 # Allow GitHub Actions to impersonate this SA.
 gcloud iam service-accounts add-iam-policy-binding \
   $CI_SA_NAME@$PROJECT_ID.iam.gserviceaccount.com \
@@ -137,11 +147,29 @@ gcloud iam service-accounts add-iam-policy-binding \
   --member="principalSet://iam.googleapis.com/projects/$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')/locations/global/workloadIdentityPools/$POOL_NAME/attribute.repository_owner/$GITHUB_ORG"
 ```
 
-Set these as GitHub Actions secrets in your repos:
+Set these as GitHub Actions secrets and variables in your repos:
+
+**Secrets:**
 
 | Secret | Value |
 |--------|-------|
 | `GCP_WIF_PROVIDER` | `projects/{project-number}/locations/global/workloadIdentityPools/{pool}/providers/{provider}` |
 | `GCP_SA_EMAIL` | `folio-ci@{project}.iam.gserviceaccount.com` |
+
+**Variables:**
+
+| Variable | Value |
+|----------|-------|
+| `GCS_BUCKET` | Your GCS bucket name |
+
+## Subsequent Deployments
+
+After the initial setup, deploy new server versions using the `deploy.yml` workflow:
+
+```bash
+gh workflow run deploy.yml -f image_tag=v0.1.0
+```
+
+This triggers a manual deployment that updates the Cloud Run service image via WIF authentication.
 
 See the [infra/setup.sh](https://github.com/charliek/folio/blob/main/infra/setup.sh) script for a complete provisioning example.

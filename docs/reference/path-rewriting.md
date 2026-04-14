@@ -1,10 +1,11 @@
 # Path Rewriting
 
-The server maps URL paths to GCS object keys using two rules:
+The server maps URL paths to GCS object keys using two routing rules, plus an index rewrite:
 
 1. Paths starting with `/repos/` pass through directly
 2. All other paths get the root prefix (`_root/`) prepended
-3. Paths ending in `/` get `index.html` appended
+
+Additionally, paths ending in `/` get `index.html` appended.
 
 ## Examples
 
