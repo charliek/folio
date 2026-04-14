@@ -12,15 +12,15 @@ A presentable, functional open-source repo with a working Go server container im
 - [x] Examples, infra script, CLAUDE.md
 - [x] README with architecture overview and quick start
 
-## Phase 2: GCP Infrastructure & Private Deployment
+## Phase 2: GCP Infrastructure & Private Deployment ✅
 
 Stand up the private instance on a custom domain.
 
-- Provision GCS bucket, Secret Manager secrets (login password, HMAC key)
-- Set up Workload Identity Federation for GitHub Actions → GCP
-- Create `deploy-server.yml` workflow (push to `server/` → build, push to GHCR, deploy to Cloud Run)
-- Deploy to Cloud Run, set up domain mapping and DNS
-- Verify end-to-end: upload test HTML to GCS, visit the domain, see login → content
+- [x] Provision GCS bucket, Secret Manager secrets (login password, HMAC key)
+- [x] Set up Workload Identity Federation for GitHub Actions → GCP
+- [x] Create deploy workflow with manual `workflow_dispatch` trigger
+- [x] Deploy to Cloud Run, set up domain mapping and DNS
+- [x] Verify end-to-end: upload test HTML to GCS, visit the domain, see login → content
 
 ## Phase 3: Root Site & Reusable Workflow
 

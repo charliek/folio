@@ -1,0 +1,117 @@
+name: Publish Docs
+
+on:
+  workflow_call:
+    inputs:
+      gcs-bucket:
+        required: true
+        type: string
+        description: Target GCS bucket name
+      repo-name:
+        required: false
+        type: string
+        default: ''
+        description: "Path under /repos/ (default: repository name)"
+      docs-dir:
+        required: false
+        type: string
+        default: '.'
+        description: Directory containing mkdocs.yml
+      python-version:
+        required: false
+        type: string
+        default: '3.13'
+        description: Python version for uv
+      docs-group:
+        required: false
+        type: string
+        default: 'docs'
+        description: uv dependency group for docs
+      site-dir:
+        required: false
+        type: string
+        default: 'site-build'
+        description: Build output directory
+      description:
+        required: false
+        type: string
+        default: ''
+        description: "Repo description override (default: from mkdocs.yml site_description)"
+    secrets:
+      GCP_WORKLOAD_IDENTITY_PROVIDER:
+        required: true
+      GCP_SERVICE_ACCOUNT:
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v8
+
+      - name: Install Python
+        run: uv python install ${{ inputs.python-version }}
+
+      - name: Install dependencies
+        working-directory: ${{ inputs.docs-dir }}
+        run: uv sync --group ${{ inputs.docs-group }}
+
+      - name: Build docs
+        working-directory: ${{ inputs.docs-dir }}
+        run: uv run mkdocs build --strict
+
+      - name: Resolve repo name
+        id: repo
+        run: |
+          REPO_NAME="${{ inputs.repo-name }}"
+          if [ -z "$REPO_NAME" ]; then
+            REPO_NAME="${{ github.event.repository.name }}"
+          fi
+          echo "name=$REPO_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Write _meta.json
+        working-directory: ${{ inputs.docs-dir }}
+        run: |
+          DESCRIPTION="${{ inputs.description }}"
+          if [ -z "$DESCRIPTION" ]; then
+            DESCRIPTION=$(grep '^site_description:' mkdocs.yml | sed "s/site_description:[[:space:]]*['\"]\\{0,1\\}\\(.*\\)['\"]\\{0,1\\}/\\1/" || echo "")
+          fi
+          cat > "${{ inputs.site-dir }}/_meta.json" <<EOF
+          {
+            "name": "${{ steps.repo.outputs.name }}",
+            "description": "$DESCRIPTION",
+            "last_published": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "repo": "${{ github.repository }}",
+            "url": "${{ github.server_url }}/${{ github.repository }}"
+          }
+          EOF
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Sync to GCS
+        working-directory: ${{ inputs.docs-dir }}
+        run: |
+          gcloud storage rsync --recursive --delete-unmatched-destination-objects \
+            "${{ inputs.site-dir }}/" \
+            "gs://${{ inputs.gcs-bucket }}/repos/${{ steps.repo.outputs.name }}/"
+
+      - name: Output publish summary
+        run: |
+          echo "### Docs Published :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Repo:** ${{ steps.repo.outputs.name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Bucket:** ${{ inputs.gcs-bucket }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Path:** repos/${{ steps.repo.outputs.name }}/" >> $GITHUB_STEP_SUMMARY

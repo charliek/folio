@@ -2,14 +2,11 @@
 #
 # Copy this file to .github/workflows/publish.yml in your repo.
 #
-# NOTE: This workflow calls the reusable publish-docs.yml workflow from the
-# folio repo. That workflow is created in Phase 3 of the folio project.
-# Until then, this file serves as a reference for the expected interface.
-#
 # Prerequisites:
 #   - GCS bucket configured for folio
 #   - Workload Identity Federation set up for GitHub Actions
 #   - GitHub Actions secrets: GCP_WIF_PROVIDER, GCP_SA_EMAIL
+#   - GitHub Actions variable: GCS_BUCKET
 #   - pyproject.toml with docs dependency group
 #   - mkdocs.yml with site_dir: site-build
 
@@ -21,19 +18,20 @@ on:
       - 'docs/**'
       - 'mkdocs.yml'
       - 'pyproject.toml'
+  workflow_dispatch:
 
 jobs:
   publish:
     uses: charliek/folio/.github/workflows/publish-docs.yml@main
     with:
-      gcs-bucket: my-docs-bucket
+      gcs-bucket: ${{ vars.GCS_BUCKET }}
       # Optional overrides:
       # repo-name: custom-name        # Default: repository name
       # docs-dir: .                    # Default: .
-      # builder: mkdocs               # Default: mkdocs
-      # python-version: '3.12'        # Default: 3.12
+      # python-version: '3.13'        # Default: 3.13
       # docs-group: docs              # Default: docs
       # site-dir: site-build          # Default: site-build
+      # description: 'Custom desc'    # Default: from mkdocs.yml site_description
     secrets:
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WIF_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SA_EMAIL }}
