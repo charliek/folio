@@ -85,14 +85,17 @@ jobs:
           SITE_DIR: ${{ inputs.site-dir }}
         run: |
           uv run python - <<'PYEOF'
-          import json, yaml, os
+          import json, re, os
           from datetime import datetime, timezone
 
           desc = os.environ.get("INPUT_DESCRIPTION", "")
           if not desc:
               with open("mkdocs.yml") as f:
-                  cfg = yaml.safe_load(f)
-              desc = cfg.get("site_description", "")
+                  for line in f:
+                      m = re.match(r"""^site_description:\s*['"]?(.+?)['"]?\s*$""", line)
+                      if m:
+                          desc = m.group(1)
+                          break
 
           meta = {
               "name": os.environ["REPO_NAME"],
