@@ -77,28 +77,36 @@ jobs:
 
       - name: Write _meta.json
         working-directory: ${{ inputs.docs-dir }}
+        env:
+          INPUT_DESCRIPTION: ${{ inputs.description }}
+          REPO_NAME: ${{ steps.repo.outputs.name }}
+          GITHUB_REPO: ${{ github.repository }}
+          GITHUB_URL: ${{ github.server_url }}/${{ github.repository }}
+          SITE_DIR: ${{ inputs.site-dir }}
         run: |
-          DESCRIPTION="${{ inputs.description }}"
-          if [ -z "$DESCRIPTION" ]; then
-            DESCRIPTION=$(uv run python -c "
-          import yaml
-          with open('mkdocs.yml') as f:
-              cfg = yaml.safe_load(f)
-          print(cfg.get('site_description', ''))
-          " 2>/dev/null || echo "")
-          fi
-          uv run python -c "
-          import json
+          uv run python - <<'PYEOF'
+          import json, yaml, os
+          from datetime import datetime, timezone
+
+          desc = os.environ.get("INPUT_DESCRIPTION", "")
+          if not desc:
+              with open("mkdocs.yml") as f:
+                  cfg = yaml.safe_load(f)
+              desc = cfg.get("site_description", "")
+
           meta = {
-              'name': '${{ steps.repo.outputs.name }}',
-              'description': '''$DESCRIPTION'''.strip(),
-              'last_published': '$(date -u +%Y-%m-%dT%H:%M:%SZ)',
-              'repo': '${{ github.repository }}',
-              'url': '${{ github.server_url }}/${{ github.repository }}'
+              "name": os.environ["REPO_NAME"],
+              "description": desc,
+              "last_published": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+              "repo": os.environ["GITHUB_REPO"],
+              "url": os.environ["GITHUB_URL"],
           }
-          with open('${{ inputs.site-dir }}/_meta.json', 'w') as f:
+
+          out = os.path.join(os.environ["SITE_DIR"], "_meta.json")
+          with open(out, "w") as f:
               json.dump(meta, f, indent=2)
-          "
+          print(f"Wrote {out}: {json.dumps(meta)}")
+          PYEOF
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
