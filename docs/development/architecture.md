@@ -52,7 +52,7 @@ All GCS operations go through this interface. The production implementation (`La
 
 The GCS client is initialized on first request, not at startup. This allows:
 
-- Server to start and serve `/healthz` without GCP credentials
+- Server to start and serve `/_health` without GCP credentials
 - Health checks to work in CI and local dev
 - Faster cold starts on Cloud Run
 

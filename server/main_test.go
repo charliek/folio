@@ -137,7 +137,7 @@ func TestValidateConfig_MissingBucket(t *testing.T) {
 }
 
 func TestHealthz(t *testing.T) {
-	req := httptest.NewRequest("GET", "/healthz", nil)
+	req := httptest.NewRequest("GET", "/_health", nil)
 	rec := httptest.NewRecorder()
 	handleHealthz(rec, req)
 

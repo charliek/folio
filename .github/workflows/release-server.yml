@@ -7,6 +7,10 @@ on:
 permissions:
   contents: write
   packages: write
+  id-token: write
+
+env:
+  GCP_REGION: us-central1
 
 jobs:
   release:
@@ -41,6 +45,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
+
       - name: Extract version
         id: version
         run: echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
@@ -54,6 +67,8 @@ jobs:
           tags: |
             ghcr.io/charliek/folio:${{ steps.version.outputs.tag }}
             ghcr.io/charliek/folio:latest
+            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/folio/folio-server:${{ steps.version.outputs.tag }}
+            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/folio/folio-server:latest
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

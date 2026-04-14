@@ -64,7 +64,7 @@ func main() {
 	cache := NewCache(cfg.CacheMaxMB, cfg.CacheTTL)
 
 	// Lazy GCS client — created on first request, not at startup.
-	// This allows the server to start and serve /healthz without GCP credentials.
+	// This allows the server to start and serve /_health without GCP credentials.
 	bucket := NewLazyBucket(cfg.GCSBucket)
 
 	hmacKey := []byte(cfg.CookieHMACKey)
@@ -72,7 +72,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Unauthenticated routes.
-	mux.HandleFunc("GET /healthz", handleHealthz)
+	mux.HandleFunc("GET /_health", handleHealthz)
 	mux.HandleFunc("GET /_login", handleLoginPage)
 	mux.HandleFunc("POST /_login", newLoginSubmitHandler(cfg.LoginPassword, hmacKey, cfg.CookieMaxAge, cfg.CookieSecure))
 
@@ -243,7 +243,7 @@ const (
 
 // LazyBucket implements BucketReader with lazy GCS client initialization.
 // The client is created on first request, allowing the server to start and
-// serve /healthz without GCP credentials. Retries on transient init failures.
+// serve /_health without GCP credentials. Retries on transient init failures.
 type LazyBucket struct {
 	mu         sync.Mutex
 	bucketName string

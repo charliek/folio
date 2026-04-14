@@ -33,23 +33,23 @@ jobs:
         run: |
           gcloud run services update ${{ env.SERVICE_NAME }} \
             --region ${{ env.GCP_REGION }} \
-            --image ghcr.io/charliek/folio:${{ inputs.image_tag }}
+            --image ${{ env.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/folio/folio-server:${{ inputs.image_tag }}
 
       - name: Verify deployment health
         run: |
           SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
             --region ${{ env.GCP_REGION }} \
             --format 'value(status.url)')
-          echo "Checking health at ${SERVICE_URL}/healthz..."
+          echo "Checking health at ${SERVICE_URL}/_health..."
           for i in 1 2 3; do
-            if curl -sf "${SERVICE_URL}/healthz" > /dev/null 2>&1; then
+            if curl -sf "${SERVICE_URL}/_health" > /dev/null 2>&1; then
               echo "Health check passed"
               break
             fi
             echo "Attempt $i failed, retrying in 10s..."
             sleep 10
           done
-          curl -sf "${SERVICE_URL}/healthz" || (echo "Health check failed" && exit 1)
+          curl -sf "${SERVICE_URL}/_health" || (echo "Health check failed" && exit 1)
 
       - name: Output service URL
         run: |

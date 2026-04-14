@@ -52,7 +52,7 @@ Tools are managed via [mise](https://mise.jdx.dev/) — run `mise install` to se
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| GET | `/healthz` | No | Health check |
+| GET | `/_health` | No | Health check |
 | GET | `/_login` | No | Login page |
 | POST | `/_login` | No | Login submit |
 | GET | `/_api/repos` | Yes | List published repos |
