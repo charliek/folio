@@ -80,17 +80,25 @@ jobs:
         run: |
           DESCRIPTION="${{ inputs.description }}"
           if [ -z "$DESCRIPTION" ]; then
-            DESCRIPTION=$(grep '^site_description:' mkdocs.yml | sed "s/site_description:[[:space:]]*['\"]\\{0,1\\}\\(.*\\)['\"]\\{0,1\\}/\\1/" || echo "")
+            DESCRIPTION=$(uv run python -c "
+          import yaml
+          with open('mkdocs.yml') as f:
+              cfg = yaml.safe_load(f)
+          print(cfg.get('site_description', ''))
+          " 2>/dev/null || echo "")
           fi
-          cat > "${{ inputs.site-dir }}/_meta.json" <<EOF
-          {
-            "name": "${{ steps.repo.outputs.name }}",
-            "description": "$DESCRIPTION",
-            "last_published": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "repo": "${{ github.repository }}",
-            "url": "${{ github.server_url }}/${{ github.repository }}"
+          uv run python -c "
+          import json
+          meta = {
+              'name': '${{ steps.repo.outputs.name }}',
+              'description': '''$DESCRIPTION'''.strip(),
+              'last_published': '$(date -u +%Y-%m-%dT%H:%M:%SZ)',
+              'repo': '${{ github.repository }}',
+              'url': '${{ github.server_url }}/${{ github.repository }}'
           }
-          EOF
+          with open('${{ inputs.site-dir }}/_meta.json', 'w') as f:
+              json.dump(meta, f, indent=2)
+          "
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
