@@ -52,7 +52,9 @@ echo "Creating secrets..."
 # Generate a strong HMAC key.
 HMAC_KEY=$(openssl rand -hex 32)
 
-echo -n "CHANGE-THIS-PASSWORD" | gcloud secrets create folio-password \
+read -rsp "Enter login password: " FOLIO_PASSWORD
+echo
+echo -n "$FOLIO_PASSWORD" | gcloud secrets create folio-password \
   --data-file=- \
   --project="$PROJECT_ID"
 

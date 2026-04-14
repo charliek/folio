@@ -36,10 +36,10 @@ Wire up the documentation publishing pipeline.
 
 Start publishing real documentation from private repos.
 
-- Add caller workflow to first repo (e.g., shed)
-- Verify it appears under `/repos/shed/` on the private domain
+- Add caller workflow to first repo
+- Verify it appears under `/repos/{name}/` on the private domain
 - Confirm `_meta.json` is written and `/_api/repos` returns the entry
-- Onboard additional repos (prox, envsecrets, etc.)
+- Onboard additional repos
 - Iterate on the root landing page design as the repo list grows
 
 ## Future Considerations
