@@ -24,14 +24,18 @@ Visit `http://localhost:8080` to see the login page.
 
 ## Deploy to Cloud Run
 
+Once the [GCP resources](../guides/gcp-setup.md) are provisioned, deploy by
+applying the checked-in service manifest:
+
 ```bash
-gcloud run deploy folio-server \
-  --image ghcr.io/charliek/folio:latest \
-  --set-env-vars GCS_BUCKET=my-bucket \
-  --set-secrets LOGIN_PASSWORD=folio-password:latest,COOKIE_HMAC_KEY=folio-hmac:latest \
-  --min-instances 0 --max-instances 2 \
-  --allow-unauthenticated
+sed "s|__IMAGE__|ghcr.io/charliek/folio:latest|" deploy/cloud-run-service.yaml \
+  | gcloud run services replace - --region us-central1
 ```
+
+`deploy/cloud-run-service.yaml` holds the env vars, secret bindings,
+service account, and resource limits. To deploy new image tags in
+CI, use the `Deploy` GitHub Actions workflow, which renders the
+manifest and runs `gcloud run services replace`.
 
 See the [GCP Setup Guide](../guides/gcp-setup.md) for full provisioning instructions.
 

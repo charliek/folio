@@ -25,16 +25,19 @@ docker run -p 8080:8080 \
   ghcr.io/charliek/folio:latest
 ```
 
-Or deploy directly to Cloud Run:
+Or deploy to Cloud Run from the checked-in service manifest:
 
 ```bash
-gcloud run deploy folio-server \
-  --image ghcr.io/charliek/folio:latest \
-  --set-env-vars GCS_BUCKET=my-bucket \
-  --set-secrets LOGIN_PASSWORD=folio-password:latest,COOKIE_HMAC_KEY=folio-hmac:latest \
-  --min-instances 0 --max-instances 2 \
-  --allow-unauthenticated
+sed "s|__IMAGE__|ghcr.io/charliek/folio:latest|" deploy/cloud-run-service.yaml \
+  | gcloud run services replace - --region us-central1
 ```
+
+The manifest at `deploy/cloud-run-service.yaml` is the source of truth
+for the service's env vars, secrets, service account, and resources.
+The `Deploy` GitHub Actions workflow renders it with the target image
+tag and runs `gcloud run services replace`. See [docs/guides/gcp-setup.md](docs/guides/gcp-setup.md)
+for provisioning and [docs/getting-started/quick-start.md](docs/getting-started/quick-start.md)
+for a minimal imperative example.
 
 ## Architecture
 

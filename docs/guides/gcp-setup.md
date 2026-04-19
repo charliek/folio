@@ -27,11 +27,13 @@ gcloud storage buckets create gs://$BUCKET_NAME \
 
 ## Create Secrets
 
+Secrets follow the `{env}-{app}-{purpose}` naming convention.
+
 ```bash
-echo -n "your-password" | gcloud secrets create folio-password \
+echo -n "your-password" | gcloud secrets create prod-folio-server-login-password \
   --data-file=- --project=$PROJECT_ID
 
-echo -n "$(openssl rand -hex 32)" | gcloud secrets create folio-hmac-key \
+echo -n "$(openssl rand -hex 32)" | gcloud secrets create prod-folio-server-hmac-key \
   --data-file=- --project=$PROJECT_ID
 ```
 
@@ -50,33 +52,41 @@ gcloud storage buckets add-iam-policy-binding gs://$BUCKET_NAME \
   --role="roles/storage.objectViewer"
 
 # Grant secret access.
-gcloud secrets add-iam-policy-binding folio-password \
-  --member="serviceAccount:$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com" \
-  --role="roles/secretmanager.secretAccessor" \
-  --project=$PROJECT_ID
-
-gcloud secrets add-iam-policy-binding folio-hmac-key \
-  --member="serviceAccount:$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com" \
-  --role="roles/secretmanager.secretAccessor" \
-  --project=$PROJECT_ID
+for SECRET in prod-folio-server-login-password prod-folio-server-hmac-key; do
+  gcloud secrets add-iam-policy-binding $SECRET \
+    --member="serviceAccount:$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/secretmanager.secretAccessor" \
+    --project=$PROJECT_ID
+done
 ```
 
 ## Deploy to Cloud Run
 
-```bash
-export SERVICE_NAME=folio-server
+The service's env vars, secret bindings, service account, and resource
+limits are defined declaratively in [`deploy/cloud-run-service.yaml`](https://github.com/charliek/folio/blob/main/deploy/cloud-run-service.yaml).
+Render the template with the target image tag and apply it with
+`gcloud run services replace`:
 
-gcloud run deploy $SERVICE_NAME \
-  --image=ghcr.io/charliek/folio:latest \
-  --service-account=$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com \
-  --set-env-vars=GCS_BUCKET=$BUCKET_NAME \
-  --set-secrets=LOGIN_PASSWORD=folio-password:latest,COOKIE_HMAC_KEY=folio-hmac-key:latest \
-  --region=$REGION \
-  --project=$PROJECT_ID \
-  --min-instances=0 \
-  --max-instances=2 \
-  --memory=256Mi \
-  --allow-unauthenticated
+```bash
+export IMAGE=ghcr.io/charliek/folio:latest
+
+sed "s|__IMAGE__|$IMAGE|" deploy/cloud-run-service.yaml \
+  | gcloud run services replace - --region=$REGION --project=$PROJECT_ID
+```
+
+On subsequent deploys, use the `Deploy` GitHub Actions workflow —
+it runs the same `sed` + `replace` flow against the tag you pick.
+
+If the service account email, GCS bucket name, or secret names in
+your environment differ from the defaults baked into the template,
+edit `deploy/cloud-run-service.yaml` before applying.
+
+Allow public ingress (required so the login page can be reached):
+
+```bash
+gcloud run services add-iam-policy-binding folio-server \
+  --region=$REGION --project=$PROJECT_ID \
+  --member=allUsers --role=roles/run.invoker
 ```
 
 ## Set Up Domain Mapping
