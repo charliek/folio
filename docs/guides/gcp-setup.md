@@ -60,6 +60,43 @@ for SECRET in prod-folio-server-login-password prod-folio-server-hmac-key; do
 done
 ```
 
+## IAM scoping
+
+Every Cloud Run secret folio references is named `{env}-folio-server-{purpose}`
+(e.g. `prod-folio-server-login-password`). Generic names are avoided
+because two apps sharing one generic name in the same GCP project can
+silently read each other's values — a shared `prod-database-url`
+caused a cross-app outage in April 2026, which is why the convention
+is now enforced across the fleet.
+
+As a second line of defense, `folio-server` has **no project-level**
+`roles/secretmanager.secretAccessor`. Access is granted per-secret on
+the `prod-folio-server-*` names only, so a typo or misconfiguration
+that points the service at another app's secret fails loudly at
+container start with an IAM error.
+
+### Roles granted by `infra/setup.sh`
+
+| Service Account | Role | Scope | Why |
+|---|---|---|---|
+| `folio-server` | `roles/storage.objectViewer` | bucket `gs://$BUCKET_NAME` | Serve static docs from GCS |
+| `folio-server` | `roles/secretmanager.secretAccessor` | **per-secret** on each `prod-folio-server-*` | Read only folio's secrets at startup. No project-level grant — see above. |
+| `folio-ci` | `roles/storage.objectAdmin` | bucket `gs://$BUCKET_NAME` | Publish docs from CI |
+| `folio-ci` | `roles/run.developer` | project | Deploy Cloud Run service |
+| `folio-ci` | `roles/iam.serviceAccountUser` | on `folio-server` | Deploy services that run as `folio-server` |
+
+### Verify no broad secret grant has crept in
+
+```bash
+gcloud projects get-iam-policy $PROJECT_ID \
+  --flatten="bindings[].members" \
+  --filter="bindings.members:serviceAccount:folio-server@$PROJECT_ID.iam.gserviceaccount.com AND bindings.role:roles/secretmanager.secretAccessor" \
+  --format="value(bindings.role)"
+```
+
+Expected: empty output. If anything prints, remove the broad binding
+with `gcloud projects remove-iam-policy-binding`.
+
 ## Deploy to Cloud Run
 
 The service's env vars, secret bindings, service account, and resource
