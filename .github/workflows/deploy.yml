@@ -20,6 +20,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
@@ -29,11 +32,19 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v3
 
+      - name: Render Cloud Run service manifest
+        env:
+          IMAGE: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/folio/folio-server:${{ inputs.image_tag }}
+        run: |
+          sed "s|__IMAGE__|${IMAGE}|" deploy/cloud-run-service.yaml > /tmp/rendered.yaml
+          echo "--- rendered manifest ---"
+          cat /tmp/rendered.yaml
+
       - name: Deploy to Cloud Run
         run: |
-          gcloud run services update ${{ env.SERVICE_NAME }} \
+          gcloud run services replace /tmp/rendered.yaml \
             --region ${{ env.GCP_REGION }} \
-            --image ${{ env.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/folio/folio-server:${{ inputs.image_tag }}
+            --project ${{ vars.GCP_PROJECT_ID }}
 
       - name: Verify deployment health
         run: |

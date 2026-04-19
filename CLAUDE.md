@@ -30,6 +30,7 @@ Tools are managed via [mise](https://mise.jdx.dev/) — run `mise install` to se
   - `auth.go` — Password login, cookie validation, auth middleware
   - `proxy.go` — GCS proxy, path rewriting, repo discovery
   - `cache.go` — In-memory LRU/TTL cache
+- `deploy/cloud-run-service.yaml` — Cloud Run service manifest (source of truth for prod env vars, secrets, SA, resources)
 - `docs/` — MkDocs documentation site
 - `examples/` — Starter configs for caller repos
 - `infra/` — GCP provisioning scripts

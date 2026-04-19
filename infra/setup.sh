@@ -49,16 +49,20 @@ gcloud storage buckets create "gs://$BUCKET_NAME" \
 
 echo "Creating secrets..."
 
+# Secrets follow the {env}-{app}-{purpose} convention.
+LOGIN_PASSWORD_SECRET="prod-folio-server-login-password"
+HMAC_KEY_SECRET="prod-folio-server-hmac-key"
+
 # Generate a strong HMAC key.
 HMAC_KEY=$(openssl rand -hex 32)
 
 read -rsp "Enter login password: " FOLIO_PASSWORD
 echo
-echo -n "$FOLIO_PASSWORD" | gcloud secrets create folio-password \
+echo -n "$FOLIO_PASSWORD" | gcloud secrets create "$LOGIN_PASSWORD_SECRET" \
   --data-file=- \
   --project="$PROJECT_ID"
 
-echo -n "$HMAC_KEY" | gcloud secrets create folio-hmac-key \
+echo -n "$HMAC_KEY" | gcloud secrets create "$HMAC_KEY_SECRET" \
   --data-file=- \
   --project="$PROJECT_ID"
 
@@ -79,7 +83,7 @@ gcloud storage buckets add-iam-policy-binding "gs://$BUCKET_NAME" \
   --role="roles/storage.objectViewer"
 
 # Grant secret access.
-for SECRET in folio-password folio-hmac-key; do
+for SECRET in "$LOGIN_PASSWORD_SECRET" "$HMAC_KEY_SECRET"; do
   gcloud secrets add-iam-policy-binding "$SECRET" \
     --member="serviceAccount:$SERVER_SA_EMAIL" \
     --role="roles/secretmanager.secretAccessor" \
@@ -144,19 +148,25 @@ echo "GCP_SA_EMAIL: $CI_SA_EMAIL"
 # -----------------------------------------------------------------------------
 # 6. Deploy to Cloud Run
 # -----------------------------------------------------------------------------
+#
+# The service's env vars, secret bindings, service account, and resource
+# limits are declared in deploy/cloud-run-service.yaml. If the SA email,
+# bucket name, or secret names in this script differ from the values baked
+# into that file, update the template before applying.
 
-echo "Deploying to Cloud Run..."
-gcloud run deploy "$SERVICE_NAME" \
-  --image="ghcr.io/charliek/folio:latest" \
-  --service-account="$SERVER_SA_EMAIL" \
-  --set-env-vars="GCS_BUCKET=$BUCKET_NAME" \
-  --set-secrets="LOGIN_PASSWORD=folio-password:latest,COOKIE_HMAC_KEY=folio-hmac-key:latest" \
-  --region="$REGION" \
-  --project="$PROJECT_ID" \
-  --min-instances=0 \
-  --max-instances=2 \
-  --memory=256Mi \
-  --allow-unauthenticated
+echo "Deploying to Cloud Run via deploy/cloud-run-service.yaml..."
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+IMAGE="ghcr.io/charliek/folio:latest"
+
+sed "s|__IMAGE__|$IMAGE|" "$REPO_ROOT/deploy/cloud-run-service.yaml" \
+  | gcloud run services replace - \
+      --region="$REGION" \
+      --project="$PROJECT_ID"
+
+# Allow public ingress (required so the login page is reachable).
+gcloud run services add-iam-policy-binding "$SERVICE_NAME" \
+  --region="$REGION" --project="$PROJECT_ID" \
+  --member=allUsers --role=roles/run.invoker
 
 # -----------------------------------------------------------------------------
 # 7. Set Up Domain Mapping

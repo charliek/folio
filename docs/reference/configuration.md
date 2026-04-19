@@ -44,7 +44,7 @@ Objects larger than `CACHE_MAX_OBJECT_MB` are served directly from GCS without c
 The server supports two modes for secrets:
 
 - **Direct environment variables** — Set `LOGIN_PASSWORD` and `COOKIE_HMAC_KEY` directly. Simple, good for local dev.
-- **Secret Manager resource names** — Set `LOGIN_PASSWORD_SECRET` and `COOKIE_HMAC_SECRET` to Secret Manager resource names (e.g., `projects/my-project/secrets/folio-password`). The server resolves them at startup. Recommended for production.
+- **Secret Manager resource names** — Set `LOGIN_PASSWORD_SECRET` and `COOKIE_HMAC_SECRET` to Secret Manager resource names (e.g., `projects/my-project/secrets/prod-folio-server-login-password`). The server resolves them at startup. Recommended for production.
 
 If no `/versions/` suffix is provided, `/versions/latest` is appended automatically.
 
