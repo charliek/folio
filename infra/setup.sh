@@ -10,6 +10,11 @@
 #   - gcloud CLI authenticated with a project owner account
 #   - A GCP project with billing enabled
 #
+# IAM model: secret access is granted PER-SECRET (see step 3 below).
+# See docs/guides/gcp-setup.md "IAM scoping" for why — and do not add
+# a project-level roles/secretmanager.secretAccessor binding for the
+# runtime SA.
+#
 # =============================================================================
 
 set -euo pipefail
@@ -82,7 +87,13 @@ gcloud storage buckets add-iam-policy-binding "gs://$BUCKET_NAME" \
   --member="serviceAccount:$SERVER_SA_EMAIL" \
   --role="roles/storage.objectViewer"
 
-# Grant secret access.
+# Grant secret access PER-SECRET, not project-level.
+# The runtime SA must only be able to read prod-folio-server-*
+# secrets. A project-level roles/secretmanager.secretAccessor would
+# let a typo in deploy/cloud-run-service.yaml silently resolve
+# another app's secret (this is how the April 2026 slauth/CallBell
+# outage started). Keep the per-secret loop below; do NOT add a
+# `gcloud projects add-iam-policy-binding` for this role.
 for SECRET in "$LOGIN_PASSWORD_SECRET" "$HMAC_KEY_SECRET"; do
   gcloud secrets add-iam-policy-binding "$SECRET" \
     --member="serviceAccount:$SERVER_SA_EMAIL" \
