@@ -16,7 +16,7 @@ make fmt            # Format code with gofmt
 make tidy           # Run go mod tidy
 make check          # Run lint + test
 make coverage       # Tests with coverage report
-make docs           # Build mkdocs site (strict mode)
+make docs           # Build the docs site (strict mode)
 make docs-serve     # Serve docs at http://127.0.0.1:7070
 make docker-build   # Build container image
 ```
@@ -31,7 +31,7 @@ Tools are managed via [mise](https://mise.jdx.dev/) — run `mise install` to se
   - `proxy.go` — GCS proxy, path rewriting, repo discovery
   - `cache.go` — In-memory LRU/TTL cache
 - `deploy/cloud-run-service.yaml` — Cloud Run service manifest (source of truth for prod env vars, secrets, SA, resources)
-- `docs/` — MkDocs documentation site
+- `docs/` — Zensical documentation site (folio's own docs)
 - `examples/` — Starter configs for caller repos
 - `infra/` — GCP provisioning scripts
 - `.github/workflows/` — CI/CD pipelines
@@ -76,7 +76,15 @@ Tools are managed via [mise](https://mise.jdx.dev/) — run `mise install` to se
 
 ## Documentation
 
-Docs use MkDocs Material. See `mkdocs.yml` for style guidelines (top comment block). Key rules:
+folio's **own** docs use [Zensical](https://zensical.org) with the shared
+[stridelabs-docs-theme](https://github.com/charliek/stridelabs-docs-theme)
+package (pinned by tag in `pyproject.toml`; palette/fonts/features live there,
+not here). See `zensical.toml` for style guidelines (top comment block).
+
+Note the distinction: the reusable `publish-docs.yml` workflow that folio
+offers to **caller repos** still builds MkDocs sites — that is folio's product
+surface, not its own toolchain, and is deliberately unchanged. Same for
+`examples/mkdocs-minimal/` and the caller-facing guides. Key rules:
 - Professional, direct tone
 - Tables for config fields and API endpoints
 - Code blocks with language hints

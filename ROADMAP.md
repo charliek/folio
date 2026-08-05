@@ -7,7 +7,7 @@ A presentable, functional open-source repo with a working Go server container im
 - [x] Go server: GCS proxy, path rewriting, password auth, in-memory cache, repo discovery, health check
 - [x] Unit tests for auth, routing, cache, config
 - [x] Dockerfile (multi-stage, distroless)
-- [x] Documentation site (mkdocs Material, 10 pages)
+- [x] Documentation site (Zensical + shared StrideLabs theme, 10 pages)
 - [x] CI/CD: test+lint, GitHub Pages, GHCR image on tags
 - [x] Examples, infra script, CLAUDE.md
 - [x] README with architecture overview and quick start
