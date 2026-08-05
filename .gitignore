@@ -27,9 +27,12 @@ coverage.html
 # Python/uv
 .venv/
 
-# MkDocs build output
+# Docs build output
 site-build/
 
+# Zensical differential-build cache (root only -- the anchor keeps this from
+# also swallowing a nested .cache/ elsewhere in the tree)
+/.cache/
 # Claude Code local/user-specific files
 .claude/settings.local.json
 .claude/projects/
