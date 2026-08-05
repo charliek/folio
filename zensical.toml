@@ -1,0 +1,93 @@
+# =============================================================================
+# Documentation Style Guidelines
+# =============================================================================
+# - Professional, direct tone (no marketing language)
+# - Tables for all CLI options and configuration fields
+# - Code blocks with language hints (yaml, bash, json, go)
+# - Use admonitions sparingly (only for important notes/warnings)
+# - Examples should be copy-pasteable
+# - Keep pages focused and concise - one topic per page
+# - No deep troubleshooting guides - keep it minimal but useful
+# =============================================================================
+
+[project]
+
+site_name = "folio"
+site_description = "Self-hosted private documentation platform"
+site_author = "folio Contributors"
+site_url = "https://charliek.github.io/folio/"
+
+repo_name = "charliek/folio"
+repo_url = "https://github.com/charliek/folio"
+edit_uri = "edit/main/docs/"
+
+docs_dir = "docs"
+site_dir = "site-build"
+
+dev_addr = "127.0.0.1:7070"
+
+nav = [
+  { "Home" = "index.md" },
+  { "Getting Started" = [
+    { "Quick Start" = "getting-started/quick-start.md" },
+    { "How It Works" = "getting-started/how-it-works.md" },
+  ] },
+  { "Guides" = [
+    { "Caller Setup" = "guides/caller-setup.md" },
+    { "GCP Setup" = "guides/gcp-setup.md" },
+  ] },
+  { "Reference" = [
+    { "Configuration" = "reference/configuration.md" },
+    { "API" = "reference/api.md" },
+    { "Path Rewriting" = "reference/path-rewriting.md" },
+  ] },
+  { "Development" = [
+    { "Setup" = "development/setup.md" },
+    { "Architecture" = "development/architecture.md" },
+  ] },
+]
+
+# -----------------------------------------------------------------------------
+# Theme
+# -----------------------------------------------------------------------------
+# The shared StrideLabs theme (stridelabs-docs-theme, pinned in pyproject.toml)
+# supplies the palette, the self-hosted type stack, the feature toggles, and
+# the owl + project-icon header lockup. Anything set here overrides it.
+#
+# Do NOT add a [project.theme.font] table: the theme sets `font: false` and
+# ships its own woff2 faces, so setting one re-enables Zensical's Google Fonts
+# <link> on every page while the self-hosted faces keep loading anyway.
+[project.theme]
+name = "stridelabs"
+
+# The icon that says *which* tool this is -- rendered beside the shared owl.
+[project.theme.icon]
+logo = "material/book-lock"
+
+# -----------------------------------------------------------------------------
+# Extra
+# -----------------------------------------------------------------------------
+[[project.extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/charliek/folio"
+
+# -----------------------------------------------------------------------------
+# Markdown extensions
+# -----------------------------------------------------------------------------
+[project.markdown_extensions.admonition]
+[project.markdown_extensions.attr_list]
+[project.markdown_extensions.pymdownx.inlinehilite]
+[project.markdown_extensions.pymdownx.snippets]
+[project.markdown_extensions.pymdownx.superfences]
+[project.markdown_extensions.pymdownx.details]
+
+[project.markdown_extensions.pymdownx.highlight]
+anchor_linenums = true
+line_spans = "__span"
+pygments_lang_class = true
+
+[project.markdown_extensions.pymdownx.tabbed]
+alternate_style = true
+
+[project.markdown_extensions.toc]
+permalink = true

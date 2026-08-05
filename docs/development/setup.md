@@ -39,7 +39,7 @@ make check         # Run lint + test
 ## Documentation
 
 ```bash
-make docs          # Build mkdocs site (strict mode)
+make docs          # Build the docs site (strict mode)
 make docs-serve    # Serve at http://127.0.0.1:7070
 ```
 
@@ -70,6 +70,6 @@ docker run -p 8080:8080 \
 | `clean` | Remove build artifacts |
 | `check` | Run lint + test |
 | `coverage` | Tests with coverage report |
-| `docs` | Build mkdocs site |
+| `docs` | Build the docs site |
 | `docs-serve` | Serve docs locally |
 | `docker-build` | Build container image |

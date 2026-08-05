@@ -25,12 +25,12 @@ coverage:
 	@echo "Coverage report: server/coverage.html"
 
 docs:
-	uv sync --group docs
-	uv run mkdocs build --strict
+	uv sync --locked --group docs
+	uv run --locked zensical build --strict
 
 docs-serve:
-	uv sync --group docs
-	uv run mkdocs serve
+	uv sync --locked --group docs
+	uv run --locked zensical serve
 
 docker-build:
 	docker build -t folio server/
