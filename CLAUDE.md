@@ -38,7 +38,7 @@ Tools are managed via [mise](https://mise.jdx.dev/) — run `mise install` to se
 
 ## Key Conventions
 
-- **Go version**: 1.25+ (see `.mise.toml`)
+- **Go version**: 1.27.4 (see `.mise.toml`)
 - **Formatting**: `gofmt` — run `make fmt` before committing
 - **Linting**: `golangci-lint` v2 — run `make lint`
 - **Tests**: Table-driven tests with `t.Run()`. Place `_test.go` files alongside source. Use `testify/assert` and `testify/require`.
