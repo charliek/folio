@@ -28,3 +28,12 @@ jobs:
           version: v2.15.0
           working-directory: server
           args: -c ../.golangci.yml
+
+  vulncheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: '1.27'
+      - run: cd server && go run golang.org/x/vuln/cmd/govulncheck@latest ./...

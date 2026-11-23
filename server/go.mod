@@ -1,6 +1,6 @@
 module github.com/charliek/folio
 
-go 1.27.0
+go 1.27.4
 
 require (
 	cloud.google.com/go/secretmanager v1.24.0
